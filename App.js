@@ -1,13 +1,16 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import ImageViwer from "./components/image-viewer";
-import CustomButton from "./components/button";
+import Button from "./components/button";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
+import CircleButton from "./components/circle-button";
+import IconButton from "./components/icon-button";
 
 const PlaceholderImage = require("./assets/images/background-image.png");
 
 export default function App() {
+  const [showAppOptions, setShowAppOptions] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
   async function pickImageAsync() {
@@ -20,9 +23,22 @@ export default function App() {
     console.log(result);
     if (!result.canceled && result.assets[0].uri) {
       setSelectedImage(result.assets[0].uri);
+      setShowAppOptions(true);
     } else {
       alert("You did not select any image.");
     }
+  }
+
+  function onReset() {
+    setShowAppOptions(false);
+  }
+
+  function onAddSticker() {
+    // we will implement this later
+  }
+
+  function onSaveImageAsync() {
+    // we will implement this later
   }
 
   return (
@@ -34,12 +50,27 @@ export default function App() {
         />
       </View>
       <View style={styles.footerContainer}>
-        <CustomButton
-          label="Choose photo"
-          theme="primary"
-          onPress={pickImageAsync}
-        />
-        <CustomButton label="Use this photo" />
+        {showAppOptions ? (
+          <View style={styles.optionsContainer}>
+            <View style={styles.optionsRow}>
+              <IconButton icon="undo" label="Reset" onPress={onReset} />
+              <CircleButton onPress={onAddSticker} />
+              <IconButton icon="save" label="Save" onPress={onSaveImageAsync} />
+            </View>
+          </View>
+        ) : (
+          <View>
+            <Button
+              label="Choose photo"
+              theme="primary"
+              onPress={pickImageAsync}
+            />
+            <Button
+              label="Use this photo"
+              onPress={() => setShowAppOptions(true)}
+            />
+          </View>
+        )}
       </View>
       <StatusBar style="auto" />
     </View>
@@ -52,6 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#25292e",
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
   },
   imageContainer: {
     flex: 1,
@@ -60,5 +92,13 @@ const styles = StyleSheet.create({
   footerContainer: {
     flex: 1 / 3,
     alignItems: "center",
+  },
+  optionsContainer: {
+    position: "absolute",
+    buttom: 80,
+  },
+  optionsRow: {
+    alignItems: "center",
+    flexDirection: "row",
   },
 });
