@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import ImageViwer from "./components/image-viewer";
 import Button from "./components/button";
 import * as ImagePicker from "expo-image-picker";
@@ -12,6 +12,7 @@ import EmojiSticker from "./components/emoji-sticker";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as MediaLibrary from "expo-media-library";
 import { captureRef } from "react-native-view-shot";
+import DomToImage from "dom-to-image";
 
 const PlaceholderImage = require("./assets/images/background-image.png");
 
@@ -57,17 +58,32 @@ export default function App() {
   }
 
   async function onSaveImageAsync() {
-    try {
-      const uri = await captureRef(imageContainerRef, {
-        quality: 1,
-        width: 440,
-      });
-      if (uri) {
-        MediaLibrary.saveToLibraryAsync(uri);
-        alert("Image Saved!");
+    if (Platform.OS !== "web") {
+      try {
+        const uri = await captureRef(imageContainerRef, {
+          quality: 1,
+          width: 440,
+        });
+        if (uri) {
+          MediaLibrary.saveToLibraryAsync(uri);
+          alert("Image Saved!");
+        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
+    } else {
+      try {
+        const uri = await DomToImage.toJpeg(imageContainerRef.current, {
+          quality: 0.95,
+        });
+
+        const link = document.createElement("a");
+        link.href = uri;
+        link.download = "sticker-smash.jpeg";
+        link.click();
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 
